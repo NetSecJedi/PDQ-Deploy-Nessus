@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AdminArsenal.Export Code="PDQDeploy" Name="PDQ Deploy" Version="14.2.0.0" MinimumVersion="9.0">
+  <Package>
+    <PackageDefinition name="Definition">
+      <CopyMode>Default</CopyMode>
+      <InventoryScanProfileId value="null" />
+      <ScanAfterDeployment value="null" />
+      <Timeout value="60" />
+      <UseCustomTimeout value="false" />
+      <RunAs value="null" />
+      <Steps type="list">
+        <PowerShellStep>
+          <CustomCommandLine></CustomCommandLine>
+          <Files></Files>
+          <Script>function Test-RegistryKeyValue
+{
+    &lt;#
+    .SYNOPSIS
+    Tests if a registry value exists.
+
+    .DESCRIPTION
+    The usual ways for checking if a registry value exists don't handle when a value simply has an empty or null value.  This function actually checks if a key has a value with a given name.
+
+    .EXAMPLE
+    Test-RegistryKeyValue -Path 'hklm:\Software\Carbon\Test' -Name 'Title'
+
+    Returns `True` if `hklm:\Software\Carbon\Test` contains a value named 'Title'.  `False` otherwise.
+    #&gt;
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]
+        # The path to the registry key where the value should be set.  Will be created if it doesn't exist.
+        $Path,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        # The name of the value being set.
+        $Name
+    )
+
+    if( -not (Test-Path -Path $Path -PathType Container) )
+    {
+        return $false
+    }
+
+    $properties = Get-ItemProperty -Path $Path 
+    if( -not $properties )
+    {
+        return $false
+    }
+
+    $member = Get-Member -InputObject $properties -Name $Name
+    if( $member )
+    {
+        return $true
+    }
+    else
+    {
+        return $false
+    }
+
+}
+
+### 32 Bit Keys ###
+# NCSEcw.dll or AGEcw43.dll Killbit 
+$Exists = Test-RegistryKeyValue -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility\{D63891F1-E026-11D3-A6C3-005004055C6C}' -Name 'Compatibility Flags'
+if ( -not $Exists )
+{
+   New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility' -Name '{D63891F1-E026-11D3-A6C3-005004055C6C}'
+   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility\{D63891F1-E026-11D3-A6C3-005004055C6C}' -Name 'Compatibility Flags' -value 0x00000400 -Type DWORD -Force
+}
+
+# EMSMTP.dll Killbit
+$Exists = Test-RegistryKeyValue -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility\{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}' -Name 'Compatibility Flags'
+if ( -not $Exists )
+{
+   New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility' -Name '{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}'
+   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility\{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}' -Name 'Compatibility Flags' -value 0x00000400 -Type DWORD -Force
+}
+
+### 64 Bit Keys ###
+$Exists = Test-RegistryKeyValue -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{D63891F1-E026-11D3-A6C3-005004055C6C}' -Name 'Compatibility Flags'
+if ( -not $Exists )
+{
+   New-Item -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility' -Name '{D63891F1-E026-11D3-A6C3-005004055C6C}'
+   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{D63891F1-E026-11D3-A6C3-005004055C6C}' -Name 'Compatibility Flags' -value 0x00000400 -Type DWORD -Force
+}
+
+# EMSMTP.dll Killbit
+$Exists = Test-RegistryKeyValue -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}' -Name 'Compatibility Flags'
+if ( -not $Exists )
+{
+   New-Item -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility' -Name '{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}'
+   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}' -Name 'Compatibility Flags' -value 0x00000400 -Type DWORD -Force
+}</Script>
+          <SuccessCodes>0</SuccessCodes>
+          <RunAs value="null" />
+          <Conditions type="list">
+            <PackageStepCondition>
+              <Architecture>Both</Architecture>
+              <Version>All</Version>
+              <TypeName>OperatingSystem</TypeName>
+            </PackageStepCondition>
+            <PackageStepCondition>
+              <IsUserLoggedOn>AlwaysRun</IsUserLoggedOn>
+              <TypeName>LoggedOnUser</TypeName>
+            </PackageStepCondition>
+          </Conditions>
+          <ErrorMode>StopDeploymentFail</ErrorMode>
+          <Title>32 bit Killbits</Title>
+          <TypeName>PowerShell</TypeName>
+          <IsEnabled value="true" />
+        </PowerShellStep>
+        <PowerShellStep>
+          <CustomCommandLine></CustomCommandLine>
+          <Files></Files>
+          <Script>function Test-RegistryKeyValue
+{
+    &lt;#
+    .SYNOPSIS
+    Tests if a registry value exists.
+
+    .DESCRIPTION
+    The usual ways for checking if a registry value exists don't handle when a value simply has an empty or null value.  This function actually checks if a key has a value with a given name.
+
+    .EXAMPLE
+    Test-RegistryKeyValue -Path 'hklm:\Software\Carbon\Test' -Name 'Title'
+
+    Returns `True` if `hklm:\Software\Carbon\Test` contains a value named 'Title'.  `False` otherwise.
+    #&gt;
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]
+        # The path to the registry key where the value should be set.  Will be created if it doesn't exist.
+        $Path,
+
+        [Parameter(Mandatory=$true)]
+        [string]
+        # The name of the value being set.
+        $Name
+    )
+
+    if( -not (Test-Path -Path $Path -PathType Container) )
+    {
+        return $false
+    }
+
+    $properties = Get-ItemProperty -Path $Path 
+    if( -not $properties )
+    {
+        return $false
+    }
+
+    $member = Get-Member -InputObject $properties -Name $Name
+    if( $member )
+    {
+        return $true
+    }
+    else
+    {
+        return $false
+    }
+
+}
+
+# NCSEcw.dll or AGEcw43.dll Killbit 
+$Exists = Test-RegistryKeyValue -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{D63891F1-E026-11D3-A6C3-005004055C6C}' -Name 'Compatibility Flags'
+if ( -not $Exists )
+{
+   New-Item -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility' -Name '{D63891F1-E026-11D3-A6C3-005004055C6C}'
+   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{D63891F1-E026-11D3-A6C3-005004055C6C}' -Name 'Compatibility Flags' -value 0x00000400 -Type DWORD -Force
+}
+
+# EMSMTP.dll Killbit
+$Exists = Test-RegistryKeyValue -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}' -Name 'Compatibility Flags'
+if ( -not $Exists )
+{
+   New-Item -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility' -Name '{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}'
+   Set-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}' -Name 'Compatibility Flags' -value 0x00000400 -Type DWORD -Force
+}</Script>
+          <SuccessCodes>0</SuccessCodes>
+          <RunAs value="null" />
+          <Conditions type="list">
+            <PackageStepCondition>
+              <Architecture>Bits64</Architecture>
+              <Version>All</Version>
+              <TypeName>OperatingSystem</TypeName>
+            </PackageStepCondition>
+            <PackageStepCondition>
+              <IsUserLoggedOn>AlwaysRun</IsUserLoggedOn>
+              <TypeName>LoggedOnUser</TypeName>
+            </PackageStepCondition>
+          </Conditions>
+          <ErrorMode>StopDeploymentFail</ErrorMode>
+          <Title>64 bit Killbits</Title>
+          <TypeName>PowerShell</TypeName>
+          <IsEnabled value="false" />
+        </PowerShellStep>
+        <CommandStep>
+          <Command>reg add "HKLM\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility\{E9880553-B8A7-4960-A668-95C68BED571E}" /v "Compatibility Flags" /t REG_DWORD /d 0x00000400 /f
+reg add "HKLM\SOFTWARE\Wow6432Node\\Microsoft\Internet Explorer\ActiveX Compatibility\{E9880553-B8A7-4960-A668-95C68BED571E}" /v "Compatibility Flags" /t REG_DWORD /d 0x00000400 /f</Command>
+          <Files></Files>
+          <SuccessCodes>0</SuccessCodes>
+          <RunAs value="null" />
+          <Conditions type="list">
+            <PackageStepCondition>
+              <Architecture>Both</Architecture>
+              <Version>All</Version>
+              <TypeName>OperatingSystem</TypeName>
+            </PackageStepCondition>
+            <PackageStepCondition>
+              <IsUserLoggedOn>AlwaysRun</IsUserLoggedOn>
+              <TypeName>LoggedOnUser</TypeName>
+            </PackageStepCondition>
+          </Conditions>
+          <ErrorMode>StopDeploymentFail</ErrorMode>
+          <Title>Add Reg Key - Old Way</Title>
+          <TypeName>Command</TypeName>
+          <IsEnabled value="false" />
+        </CommandStep>
+      </Steps>
+    </PackageDefinition>
+    <Description>Fixes Nessus Plugin ID's 26185 and 51873</Description>
+    <FolderId value="6" />
+    <Name>Oracle Document Capture and EasyMail SMTP Vulnerabilities</Name>
+    <Path>Packages\Nessus Mitigations\Oracle Document Capture and EasyMail SMTP Vulnerabilities</Path>
+    <Version></Version>
+    <PackageDisplaySettings name="DisplaySettings">
+      <DisplayType>Normal</DisplayType>
+      <IconKey>Icon-Package</IconKey>
+      <SortOrder value="8" />
+    </PackageDisplaySettings>
+  </Package>
+</AdminArsenal.Export>
