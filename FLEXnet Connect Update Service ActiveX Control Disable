@@ -62,7 +62,7 @@ reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibi
     <Description>Add reg key to enable fix for CVE-2007-5660, CVE-2007-6654</Description>
     <FolderId value="6" />
     <Name>FLEXnet Connect Update Service ActiveX Control disable</Name>
-    <Path>Packages\IAI Custom\Nessus Mitigations\FLEXnet Connect Update Service ActiveX Control disable</Path>
+    <Path>Packages\Nessus Mitigations\FLEXnet Connect Update Service ActiveX Control disable</Path>
     <Version></Version>
     <PackageDisplaySettings name="DisplaySettings">
       <DisplayType>Normal</DisplayType>
