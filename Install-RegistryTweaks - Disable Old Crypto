@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AdminArsenal.Export Code="PDQDeploy" Name="PDQ Deploy" Version="14.2.0.0" MinimumVersion="9.0">
+  <Package>
+    <PackageDefinition name="Definition">
+      <CopyMode>Default</CopyMode>
+      <InventoryScanProfileId value="null" />
+      <ScanAfterDeployment value="null" />
+      <Timeout value="60" />
+      <UseCustomTimeout value="false" />
+      <RunAs value="null" />
+      <Steps type="list">
+        <PowerShellStep>
+          <CustomCommandLine></CustomCommandLine>
+          <Files></Files>
+          <Script>function Install-RegistryTweaks {
+    [CmdletBinding()]
+    Param (
+        [Parameter(ValueFromPipeline=$True)]
+        [Alias('InputObject')]
+        [hashtable]$RegistryTweaks
+    )
+       
+    $RegistryTweaks.GetEnumerator() | %{
+        $path = $_.Key -split "\\"
+        
+        if (-not (Test-Path $_.Key)){
+            Write-Verbose "Key doesn't exist, beginning to recursively create subkeys"    
+            0..($path.length - 1) | %{
+                if (-not (Test-Path ($path[0..$_] -join "\"))){
+                    Write-Verbose "Creating subkey $($path[$_]) in $($path[0..($_-1)] -join "\")"
+                    (get-item ($path[0..($_-2)] -join "\")).OpenSubKey($path[$_-1],$true).CreateSubKey($path[$_])
+                }
+            }
+        }
+
+        Write-Verbose "Opening Target Key $($_.Key)"
+        $thisKey = (get-item ($path[0..($path.Length-2)] -join "\")).OpenSubKey($path[$path.Length-1],$true)
+        $_.Value.GetEnumerator() | % {
+            if (($thisKey.GetValue($_.Key) -eq $_.Value.Val)) {
+                Write-Verbose "Value $($_.Key) = $($_.Value.Val) value already set"
+            } else {
+                Write-Verbose "Writing Value $(($_.Key, $_.Value.Val, [Microsoft.Win32.RegistryValueKind]::($_.Value.Type)) -join ", ")"
+                $thisKey.SetValue($_.Key, $_.Value.Val,  [Microsoft.Win32.RegistryValueKind]::($_.Value.Type))
+            }
+        }
+
+    }
+}
+
+$Crypto = @{
+    'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Client'=@{
+        'DisabledByDefault'=@{
+            Val=1
+            Type='DWord'
+        }
+    }
+    'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Server'=@{
+        'Enabled'=@{
+            Val=0
+            Type='DWord'
+        }
+    }
+    'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\RC4 128/128'=@{
+        'Enabled'=@{
+            Val=0
+            Type='DWord'
+        }
+    }
+    'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\RC4 40/128'=@{
+        'Enabled'=@{
+            Val=0
+            Type='DWord'
+        }
+    }
+    'HKLM:\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Ciphers\RC4 56/128'=@{
+        'Enabled'=@{
+            Val=0
+            Type='DWord'
+        }
+    }
+    'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings'=@{
+        'SecureProtocols'=@{
+            Val=2688
+            Type='DWord'
+        }
+    }
+}
+
+Install-RegistryTweaks $Crypto</Script>
+          <SuccessCodes>0</SuccessCodes>
+          <RunAs value="null" />
+          <Conditions type="list">
+            <PackageStepCondition>
+              <Architecture>Both</Architecture>
+              <Version>All</Version>
+              <TypeName>OperatingSystem</TypeName>
+            </PackageStepCondition>
+            <PackageStepCondition>
+              <IsUserLoggedOn>AlwaysRun</IsUserLoggedOn>
+              <TypeName>LoggedOnUser</TypeName>
+            </PackageStepCondition>
+          </Conditions>
+          <ErrorMode>StopDeploymentFail</ErrorMode>
+          <Title>Install Crypto registry keys</Title>
+          <TypeName>PowerShell</TypeName>
+          <IsEnabled value="true" />
+        </PowerShellStep>
+      </Steps>
+    </PackageDefinition>
+    <Description>Install registry keys to mitigate Nessus vulnerability plugin ID's:
+
+78479 - SSLv3 Padding Oracle On Downgraded Legacy Encryption Vulnerability (POODLE)</Description>
+    <FolderId value="6" />
+    <Name>Install-RegistryTweaks - Disable Old Crypto</Name>
+    <Path>Packages\Nessus Mitigations\Install-RegistryTweaks - Disable Old Crypto</Path>
+    <Version></Version>
+    <PackageDisplaySettings name="DisplaySettings">
+      <DisplayType>Normal</DisplayType>
+      <IconKey>Icon-Package</IconKey>
+      <SortOrder value="8" />
+    </PackageDisplaySettings>
+  </Package>
+</AdminArsenal.Export>
