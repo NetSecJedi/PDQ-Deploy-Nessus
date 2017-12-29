@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AdminArsenal.Export Code="PDQDeploy" Name="PDQ Deploy" Version="14.2.0.0" MinimumVersion="9.0">
+  <Package>
+    <PackageDefinition name="Definition">
+      <CopyMode>Default</CopyMode>
+      <InventoryScanProfileId value="null" />
+      <ScanAfterDeployment value="null" />
+      <Timeout value="60" />
+      <UseCustomTimeout value="false" />
+      <RunAs value="null" />
+      <Steps type="list">
+        <PowerShellStep>
+          <CustomCommandLine></CustomCommandLine>
+          <Files></Files>
+          <Script># Compensate for non standard windows installs
+$Windowsdir = Get-ChildItem -Path Env:windir
+$FullPath = $Windowsdir.value + "\SysWOW64"
+
+# MS XML Parser version 1
+if (Test-Path $FullPath\msxml.dll) { Rename-Item -NewName $FullPath\msxml.dll.old $FullPath\msxml.dll }
+
+# MS XML Parser version 4
+if (Test-Path $FullPath\msxml4.dll) { Rename-Item -NewName $FullPath\msxml4.dll.old $FullPath\msxml4.dll }</Script>
+          <SuccessCodes>0</SuccessCodes>
+          <RunAs value="null" />
+          <Conditions type="list">
+            <PackageStepCondition>
+              <Architecture>Both</Architecture>
+              <Version>All</Version>
+              <TypeName>OperatingSystem</TypeName>
+            </PackageStepCondition>
+            <PackageStepCondition>
+              <IsUserLoggedOn>AlwaysRun</IsUserLoggedOn>
+              <TypeName>LoggedOnUser</TypeName>
+            </PackageStepCondition>
+          </Conditions>
+          <ErrorMode>StopDeploymentFail</ErrorMode>
+          <Title>Rename affected XML parser files</Title>
+          <TypeName>PowerShell</TypeName>
+          <IsEnabled value="true" />
+        </PowerShellStep>
+      </Steps>
+    </PackageDefinition>
+    <Description>From Nessus Plugin ID 62758
+
+"The remote host contains one or more unsupported versions of the Microsoft XML Parser (MSXML) or XML Core Services.
+
+Lack of support implies that no new security patches for the product will be released by the vendor. As a result, it is likely to contain security vulnerabilities.
+
+Note that support for MSXML 3.0 and 6.0 is based on the support policy of the operating system on which it is installed. Support for MSXML 5.0 is based on the Microsoft Office lifecycle policy."
+
+From the following TechNet article
+
+https://social.technet.microsoft.com/Forums/en-US/c92148ba-4f3f-4c9a-9ac2-56a39c0a8b62/uninstalling-old-msxml-parser-versions?forum=winserver8gen
+
+
+Our solution is to rename the affected .dll file to satisfy Nessus scans and deny access to the XML .dll file while maintaining the ability to recover functionality in the event a service or application is broken by not having access to the affected .dll</Description>
+    <FolderId value="6" />
+    <Name>Microsoft XML Parser (MSXML) and XML Core Services Unsupported</Name>
+    <Path>Packages\Nessus Mitigations\Microsoft XML Parser (MSXML) and XML Core Services Unsupported</Path>
+    <Version></Version>
+    <PackageDisplaySettings name="DisplaySettings">
+      <DisplayType>Normal</DisplayType>
+      <IconKey>Icon-Package</IconKey>
+      <SortOrder value="8" />
+    </PackageDisplaySettings>
+  </Package>
+</AdminArsenal.Export>
