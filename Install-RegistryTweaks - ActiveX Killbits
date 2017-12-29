@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AdminArsenal.Export Code="PDQDeploy" Name="PDQ Deploy" Version="14.2.0.0" MinimumVersion="9.0">
+  <Package>
+    <PackageDefinition name="Definition">
+      <CopyMode>Default</CopyMode>
+      <InventoryScanProfileId value="null" />
+      <ScanAfterDeployment value="null" />
+      <Timeout value="60" />
+      <UseCustomTimeout value="false" />
+      <RunAs value="null" />
+      <Steps type="list">
+        <PowerShellStep>
+          <CustomCommandLine></CustomCommandLine>
+          <Files></Files>
+          <Script>function Install-RegistryTweaks {
+    [CmdletBinding()]
+    Param (
+        [Parameter(ValueFromPipeline=$True)]
+        [Alias('InputObject')]
+        [hashtable]$RegistryTweaks
+    )
+       
+    $RegistryTweaks.GetEnumerator() | %{
+        $path = $_.Key -split "\\"
+        
+        if (-not (Test-Path $_.Key)){
+            Write-Verbose "Key doesn't exist, beginning to recursively create subkeys"    
+            0..($path.length - 1) | %{
+                if (-not (Test-Path ($path[0..$_] -join "\"))){
+                    Write-Verbose "Creating subkey $($path[$_]) in $($path[0..($_-1)] -join "\")"
+                    (get-item ($path[0..($_-2)] -join "\")).OpenSubKey($path[$_-1],$true).CreateSubKey($path[$_])
+                }
+            }
+        }
+
+        Write-Verbose "Opening Target Key $($_.Key)"
+        $thisKey = (get-item ($path[0..($path.Length-2)] -join "\")).OpenSubKey($path[$path.Length-1],$true)
+        $_.Value.GetEnumerator() | % {
+            if (($thisKey.GetValue($_.Key) -eq $_.Value.Val)) {
+                Write-Verbose "Value $($_.Key) = $($_.Value.Val) value already set"
+            } else {
+                Write-Verbose "Writing Value $(($_.Key, $_.Value.Val, [Microsoft.Win32.RegistryValueKind]::($_.Value.Type)) -join ", ")"
+                $thisKey.SetValue($_.Key, $_.Value.Val,  [Microsoft.Win32.RegistryValueKind]::($_.Value.Type))
+            }
+        }
+
+    }
+}
+
+$KillBits = @{
+    'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{D63891F1-E026-11D3-A6C3-005004055C6C}'=@{
+        'Compatibility Flags'=@{
+            Val=1024
+            Type='Dword'
+        }
+    }
+    'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility\{D63891F1-E026-11D3-A6C3-005004055C6C}'=@{
+        'Compatibility Flags'=@{
+            Val=1024
+            Type='Dword'
+        }
+    }
+    'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}'=@{
+        'Compatibility Flags'=@{
+            Val=1024
+            Type='Dword'
+        }
+    }
+    'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility\{68AC0D5F-0424-11D5-822F-00C04F6BA8D9}'=@{
+        'Compatibility Flags'=@{
+            Val=1024
+            Type='Dword'
+        }
+    }
+}
+
+Install-RegistryTweaks $Killbits</Script>
+          <SuccessCodes>0</SuccessCodes>
+          <RunAs value="null" />
+          <Conditions type="list">
+            <PackageStepCondition>
+              <Architecture>Both</Architecture>
+              <Version>All</Version>
+              <TypeName>OperatingSystem</TypeName>
+            </PackageStepCondition>
+            <PackageStepCondition>
+              <IsUserLoggedOn>AlwaysRun</IsUserLoggedOn>
+              <TypeName>LoggedOnUser</TypeName>
+            </PackageStepCondition>
+          </Conditions>
+          <ErrorMode>StopDeploymentFail</ErrorMode>
+          <Title>Install Killbit registry keys</Title>
+          <TypeName>PowerShell</TypeName>
+          <IsEnabled value="true" />
+        </PowerShellStep>
+      </Steps>
+    </PackageDefinition>
+    <Description>Install registry keys to mitigate Nessus vulnerability plugin ID's:
+
+51873 - Oracle Document Capture Multiple Vulnerabilities
+26185 - EasyMail SMTP Object ActiveX Control Multiple Buffer Overflows</Description>
+    <FolderId value="6" />
+    <Name>Install-RegistryTweaks - ActiveX Killbits</Name>
+    <Path>Packages\Nessus Mitigations\Install-RegistryTweaks - ActiveX Killbits</Path>
+    <Version></Version>
+    <PackageDisplaySettings name="DisplaySettings">
+      <DisplayType>Normal</DisplayType>
+      <IconKey>Icon-Package</IconKey>
+      <SortOrder value="8" />
+    </PackageDisplaySettings>
+  </Package>
+</AdminArsenal.Export>
