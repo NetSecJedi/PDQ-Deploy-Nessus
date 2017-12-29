@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AdminArsenal.Export Code="PDQDeploy" Name="PDQ Deploy" Version="14.2.0.0" MinimumVersion="9.0">
+  <Package>
+    <PackageDefinition name="Definition">
+      <CopyMode>Default</CopyMode>
+      <InventoryScanProfileId value="null" />
+      <ScanAfterDeployment value="null" />
+      <Timeout value="60" />
+      <UseCustomTimeout value="false" />
+      <RunAs value="null" />
+      <Steps type="list">
+        <PowerShellStep>
+          <CustomCommandLine></CustomCommandLine>
+          <Files></Files>
+          <Script>New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl' -Name 'FEATURE_ALLOW_USER32_EXCEPTION_HANDLER_HARDENING'
+
+Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_ALLOW_USER32_EXCEPTION_HANDLER_HARDENING' -Name 'iexplore.exe' -value 1
+
+New-Item -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\MAIN\FeatureControl' -Name 'FEATURE_ALLOW_USER32_EXCEPTION_HANDLER_HARDENING'
+
+Set-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\MAIN\FeatureControl\FEATURE_ALLOW_USER32_EXCEPTION_HANDLER_HARDENING' -Name 'iexplore.exe' -value 1</Script>
+          <SuccessCodes>0</SuccessCodes>
+          <RunAs value="null" />
+          <Conditions type="list">
+            <PackageStepCondition>
+              <Architecture>Both</Architecture>
+              <Version>All</Version>
+              <TypeName>OperatingSystem</TypeName>
+            </PackageStepCondition>
+            <PackageStepCondition>
+              <IsUserLoggedOn>AlwaysRun</IsUserLoggedOn>
+              <TypeName>LoggedOnUser</TypeName>
+            </PackageStepCondition>
+          </Conditions>
+          <ErrorMode>StopDeploymentFail</ErrorMode>
+          <Title></Title>
+          <TypeName>PowerShell</TypeName>
+          <IsEnabled value="true" />
+        </PowerShellStep>
+      </Steps>
+    </PackageDefinition>
+    <Description>Install KB3125869</Description>
+    <FolderId value="6" />
+    <Name>MS15-124: Cumulative Security Update for Internet Explorer (3116180)</Name>
+    <Path>Packages\Nessus Mitigations\MS15-124: Cumulative Security Update for Internet Explorer (3116180)</Path>
+    <Version></Version>
+    <PackageDisplaySettings name="DisplaySettings">
+      <DisplayType>Normal</DisplayType>
+      <IconKey>Icon-Package</IconKey>
+      <SortOrder value="8" />
+    </PackageDisplaySettings>
+  </Package>
+</AdminArsenal.Export>
