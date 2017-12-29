@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AdminArsenal.Export Code="PDQDeploy" Name="PDQ Deploy" Version="14.2.0.0" MinimumVersion="9.0">
+  <Package>
+    <PackageDefinition name="Definition">
+      <CopyMode>Default</CopyMode>
+      <InventoryScanProfileId value="null" />
+      <ScanAfterDeployment value="null" />
+      <Timeout value="60" />
+      <UseCustomTimeout value="false" />
+      <RunAs value="null" />
+      <Steps type="list">
+        <PowerShellStep>
+          <CustomCommandLine></CustomCommandLine>
+          <Files></Files>
+          <Script>New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility' -Name '{E9880553-B8A7-4960-A668-95C68BED571E}' 
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility\{E9880553-B8A7-4960-A668-95C68BED571E}' -Name 'Compatibility Flags' -value 0x00000400 -PropertyType DWORD -Force
+
+New-Item -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility' -Name '{E9880553-B8A7-4960-A668-95C68BED571E}' 
+New-ItemProperty -Path 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{E9880553-B8A7-4960-A668-95C68BED571E}' -Name 'Compatibility Flags' -value 0x00000400 -PropertyType DWORD -Force</Script>
+          <SuccessCodes>0</SuccessCodes>
+          <RunAs value="null" />
+          <Conditions type="list">
+            <PackageStepCondition>
+              <Architecture>Both</Architecture>
+              <Version>All</Version>
+              <TypeName>OperatingSystem</TypeName>
+            </PackageStepCondition>
+            <PackageStepCondition>
+              <IsUserLoggedOn>AlwaysRun</IsUserLoggedOn>
+              <TypeName>LoggedOnUser</TypeName>
+            </PackageStepCondition>
+          </Conditions>
+          <ErrorMode>StopDeploymentFail</ErrorMode>
+          <Title></Title>
+          <TypeName>PowerShell</TypeName>
+          <IsEnabled value="true" />
+        </PowerShellStep>
+        <CommandStep>
+          <Command>reg add "HKLM\SOFTWARE\Microsoft\Internet Explorer\ActiveX Compatibility\{E9880553-B8A7-4960-A668-95C68BED571E}" /v "Compatibility Flags" /t REG_DWORD /d 0x00000400 /f
+reg add "HKLM\SOFTWARE\Wow6432Node\Microsoft\Internet Explorer\ActiveX Compatibility\{E9880553-B8A7-4960-A668-95C68BED571E}" /v "Compatibility Flags" /t REG_DWORD /d 0x00000400 /f</Command>
+          <Files></Files>
+          <SuccessCodes>0</SuccessCodes>
+          <RunAs value="null" />
+          <Conditions type="list">
+            <PackageStepCondition>
+              <Architecture>Both</Architecture>
+              <Version>All</Version>
+              <TypeName>OperatingSystem</TypeName>
+            </PackageStepCondition>
+            <PackageStepCondition>
+              <IsUserLoggedOn>AlwaysRun</IsUserLoggedOn>
+              <TypeName>LoggedOnUser</TypeName>
+            </PackageStepCondition>
+          </Conditions>
+          <ErrorMode>StopDeploymentFail</ErrorMode>
+          <Title>Add Reg Key - Old Way</Title>
+          <TypeName>Command</TypeName>
+          <IsEnabled value="false" />
+        </CommandStep>
+      </Steps>
+    </PackageDefinition>
+    <Description>Add reg key to enable fix for CVE-2007-5660, CVE-2007-6654</Description>
+    <FolderId value="6" />
+    <Name>FLEXnet Connect Update Service ActiveX Control disable</Name>
+    <Path>Packages\IAI Custom\Nessus Mitigations\FLEXnet Connect Update Service ActiveX Control disable</Path>
+    <Version></Version>
+    <PackageDisplaySettings name="DisplaySettings">
+      <DisplayType>Normal</DisplayType>
+      <IconKey>Icon-Package</IconKey>
+      <SortOrder value="8" />
+    </PackageDisplaySettings>
+  </Package>
+</AdminArsenal.Export>
